@@ -1,6 +1,6 @@
 # Using Tensorflow's Estimator and Dataset APIs on popular CNNs
 
-This repo provides boiler plate code to train CNNs using the Tensorflow's popular Estimator and Dataset APIs.
+This repo provides boiler plate code to train CNNs using Tensorflow's popular Estimator and Dataset APIs.
 Several popular CNN architectures from different model zoos can be imported, more can added accordingly.
 
 ## Features
@@ -14,16 +14,17 @@ Several popular CNN architectures from different model zoos can be imported, mor
 
 ```
 python main.py \
--root_path /my_images/ \
--model_save_path ./data/model_run \
--model small_cnn \
--max_epoch 10 \
--batch_size 64 \
--image_size 50 \
--num_gpus 0 \
--num_cpus 2 \
--train_fraction 0.8 \
--color_augmentation True
+--root_path /my_images/ \
+--model_save_path ./data/model_run \
+--model small_cnn \
+--max_epoch 10 \
+--batch_size 64 \
+--image_size 50 \
+--num_gpus 0 \
+--num_cpus 2 \
+--train_fraction 0.8 \
+--color_augmentation True \
+--weight_decay 0.001
 ```
 
 ## Setup
