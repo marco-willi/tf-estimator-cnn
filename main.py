@@ -193,6 +193,7 @@ def train_iterator():
     return dataset_iterator(train_files, train_labels, True,
                             FLAGS.color_augmentation)
 
+
 def test_iterator():
     return dataset_iterator(test_files, test_labels, False, False)
 

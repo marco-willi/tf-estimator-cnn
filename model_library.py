@@ -235,6 +235,7 @@ class Alexnet(Model):
         """ Return Output Layer """
         return self.outputs
 
+
 #################################
 # InceptionResNetV2
 #################################
@@ -245,15 +246,44 @@ class InceptionResNetV2(Model):
 
     def __init__(self, input, training, params=None):
 
+        self.net_fun = get_network_fn(
+            name='inception_resnet_v2',
+            num_classes=0,
+            weight_decay=params['weight_decay'],
+            is_training=training)
+
+        pool, outputs = self.net_fun(
+            images=input,
+            global_pool=True
+            )
+
+        self.outputs = tf.squeeze(pool, axis=(1, 2))
+
+    def get_output(self):
+        """ Return Output Layer """
+        return self.outputs
+
+
+#################################
+# InceptionResNetV2
+#################################
+
+
+@Model.register_model('InceptionResNetV2_OLD')
+class InceptionResNetV2_OLD(Model):
+
+    def __init__(self, input, training, params=None):
+
         net, end_points = inception_resnet_v2(
             input, num_classes=None,
             is_training=training,
             dropout_keep_prob=0.8,
             reuse=None,
             scope='InceptionResnetV2',
-            create_aux_logits=True,
+            create_aux_logits=False,
             activation_fn=tf.nn.relu)
 
+        net = tf.layers.flatten(net)
         self.outputs = net
 
     def get_output(self):
