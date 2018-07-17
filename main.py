@@ -237,7 +237,9 @@ config_sess.gpu_options.allow_growth = True
 
 
 def distribution_gpus(num_gpus):
-    if num_gpus == 1:
+    if num_gpus == 0:
+        return tf.contrib.distribute.OneDeviceStrategy(device='/cpu:0')
+    elif num_gpus == 1:
         return tf.contrib.distribute.OneDeviceStrategy(device='/gpu:0')
     elif num_gpus > 1:
         return tf.contrib.distribute.MirroredStrategy(num_gpus=num_gpus)

@@ -4,12 +4,18 @@
     - Own models
 """
 import tensorflow as tf
+import models
+
+try:
+    import tensornets
+except ImportError:
+    tensornets = models.tensornets
 
 from models.resnet_official import resnet_model
 from models.slim.nets.inception_resnet_v2 import inception_resnet_v2
 from models.slim.nets.nets_factory import get_network_fn
 from models.small_cnn import small_cnn
-from models.tensornets.mobilenets import mobilenet25
+from tensornets.mobilenets import mobilenet25
 
 
 class Model(object):
