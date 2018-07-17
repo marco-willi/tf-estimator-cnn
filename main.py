@@ -66,6 +66,13 @@ flags.DEFINE_list(
     'image_stdevs', [1, 1, 1],
     'image stdevs (leave at default for automatic mode)')
 
+# #DEBUG
+# FLAGS.root_path = '/host/data_hdd/ctc/ss/images/'
+# FLAGS.model_save_path = '/host/data_hdd/ctc/ss/runs/species/resnet18_test/'
+# FLAGS.model = 'ResNet18'
+# FLAGS.num_gpus = 1
+# FLAGS.num_cpus = 4
+# FLAGS.weight_decay = 0.0001
 
 #################################
 # Define Dataset
@@ -117,27 +124,16 @@ test_labels = label_list[n_train:]
 # Dataset Iterator
 #################################
 
-# build tensors with filenames and labels
-filenames_train = tf.constant(train_files)
-labels_train = tf.constant(train_labels)
-
-filenames_test = tf.constant(test_files)
-labels_test = tf.constant(test_labels)
-
-
 # Standardize a single image
 def _standardize_images(image, means, stdevs):
     """ Standardize images """
     with tf.name_scope("image_standardization"):
         means = tf.expand_dims(tf.expand_dims(means, 0), 0)
         means = tf.cast(means, tf.float32)
-
         stdevs = tf.expand_dims(tf.expand_dims(stdevs, 0), 0)
         stdevs = tf.cast(stdevs, tf.float32)
-
         image = image - means
         image = tf.divide(image, stdevs)
-
         return image
 
 
@@ -150,7 +146,6 @@ def _image_augmentation(image):
         image = tf.image.random_contrast(image, lower=0.9, upper=1)
         image = tf.image.random_hue(image, max_delta=0.02)
         image = tf.image.random_saturation(image, lower=0.8, upper=1.2)
-
         return image
 
 
@@ -169,29 +164,33 @@ def _parse_function(filename, label, augmentation=True):
 
 def dataset_iterator(filenames, labels, is_train, augmentation=True):
     dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))
-    dataset = dataset.map(lambda x, y: _parse_function(x, y, augmentation),
-                          num_parallel_calls=FLAGS.num_cpus)
     if is_train:
         dataset = dataset.shuffle(buffer_size=300)
-    dataset = dataset.batch(FLAGS.batch_size)
+    dataset = dataset.apply(
+      tf.contrib.data.map_and_batch(
+          lambda x, y: _parse_function(x, y, augmentation),
+          batch_size=FLAGS.batch_size,
+          num_parallel_batches=1,
+          drop_remainder=False))
     if is_train:
         dataset = dataset.repeat(1)
     else:
         dataset = dataset.repeat(1)
+    dataset = dataset.prefetch(buffer_size=tf.contrib.data.AUTOTUNE)
     return dataset
 
 
 # Create callable iterator functions
 def train_iterator():
-    return dataset_iterator(filenames_train, labels_train, True,
+    return dataset_iterator(train_files, train_labels, True,
                             FLAGS.color_augmentation)
 
 def test_iterator():
-    return dataset_iterator(filenames_test, labels_test, False, False)
+    return dataset_iterator(test_files, test_labels, False, False)
 
 
 def original_iterator():
-    return dataset_iterator(filenames_train, labels_train, False, False)
+    return dataset_iterator(train_files, train_labels, False, False)
 
 
 #################################

@@ -73,12 +73,14 @@ class ResNet18(Model):
     def __init__(self, input, training, params=None):
         self.input = input
         self.training = training
+        self.params = params
         self.mod = _get_resnet_model(18)
-        _add_resnet_regularization_loss(params['weight_decay'])
 
     def get_output(self):
         """ Return Output Layer """
-        return self.mod(self.input, self.training)
+        outputs = self.mod(self.input, self.training)
+        _add_resnet_regularization_loss(self.params['weight_decay'])
+        return outputs
 
 
 @Model.register_model('ResNet32')
