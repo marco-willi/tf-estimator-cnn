@@ -124,6 +124,7 @@ test_labels = label_list[n_train:]
 # Dataset Iterator
 #################################
 
+
 # Standardize a single image
 def _standardize_images(image, means, stdevs):
     """ Standardize images """
@@ -153,7 +154,14 @@ def _image_augmentation(image):
 def _parse_function(filename, label, augmentation=True):
     image_string = tf.read_file(filename)
     image = tf.image.decode_jpeg(image_string, channels=3)
-    image = tf.image.resize_images(image, [FLAGS.image_size, FLAGS.image_size])
+    # randomly crop image from plus 10% width/height
+    if augmentation:
+        image = tf.image.resize_images(
+            image, [int(FLAGS.image_size*1.1), int(FLAGS.image_size*1.1)])
+        image = tf.random_crop(image, [FLAGS.image_size, FLAGS.image_size, 3])
+    else:
+        image = tf.image.resize_images(
+            image, [FLAGS.image_size, FLAGS.image_size])
     image = tf.divide(image, 255.0)
     if augmentation:
         image = _image_augmentation(image)
