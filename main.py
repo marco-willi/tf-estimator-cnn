@@ -229,7 +229,7 @@ if (FLAGS.image_means == [0, 0, 0]) and (FLAGS.image_stdevs == [1, 1, 1]):
 n_batches_per_epoch_train = int(round(n_train / FLAGS.batch_size))
 
 # Configurations
-config_sess = tf.ConfigProto()
+config_sess = tf.ConfigProto(allow_soft_placement=True)
 config_sess.gpu_options.per_process_gpu_memory_fraction = 0.8
 config_sess.gpu_options.allow_growth = True
 
