@@ -164,7 +164,7 @@ def _parse_function(filename, label, augmentation=True):
         image = _image_augmentation(image)
     image = _standardize_images(image, FLAGS.image_means,
                                 FLAGS.image_stdevs)
-    return image, label
+    return {'images': image, 'labels': label}
 
 
 def dataset_iterator(filenames, labels, is_train, augmentation=True):
@@ -178,17 +178,13 @@ def dataset_iterator(filenames, labels, is_train, augmentation=True):
         dataset = dataset.repeat(1)
     else:
         dataset = dataset.repeat(1)
-    iterator = dataset.make_one_shot_iterator()
-    images, labels = iterator.get_next()
-    features = {'images': images, 'labels': labels}
-    return features
+    return dataset
 
 
 # Create callable iterator functions
 def train_iterator():
     return dataset_iterator(filenames_train, labels_train, True,
                             FLAGS.color_augmentation)
-
 
 def test_iterator():
     return dataset_iterator(filenames_test, labels_test, False, False)
@@ -210,7 +206,10 @@ if (FLAGS.image_means == [0, 0, 0]) and (FLAGS.image_stdevs == [1, 1, 1]):
     with tf.Session() as sess:
         original_batch_size = FLAGS.batch_size
         FLAGS.batch_size = np.min([500, n_train])
-        features = sess.run(original_iterator())
+        dataset = original_iterator()
+        iterator = dataset.make_one_shot_iterator()
+        feature_dict = iterator.get_next()
+        features = sess.run(feature_dict)
         image_batch = features['images']
         means_batch = np.mean(image_batch, axis=(0, 1, 2))
         stdev_batch = np.std(image_batch, axis=(0, 1, 2))
